@@ -1,0 +1,1 @@
+rosrun camera_calibration cameracalibrator.py --size 7x5 --square 5 image:=/sensors/camera/image_color
