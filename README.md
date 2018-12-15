@@ -1,2 +1,2 @@
-# ros_lidar_camera-
+# ROS lidar camera calibration
 Test of lidar camera calibration with ROS
