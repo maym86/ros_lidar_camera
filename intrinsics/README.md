@@ -1,4 +1,4 @@
-##Intrinsic Calibration
+## Intrinsic Calibration ##
 
 Run the ROS calibration tool after starting `roscore`:
 
