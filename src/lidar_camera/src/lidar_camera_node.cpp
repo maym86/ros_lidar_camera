@@ -19,17 +19,14 @@
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/filters/crop_box.h>
 
-pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
-
 using namespace sensor_msgs;
 using namespace message_filters;
 
+pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
 Eigen::Matrix4f cooridnate_transfrom = Eigen::Matrix4f::Zero();
 
 
 void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info_msg, const PointCloud2ConstPtr& lidar_msg) {
-
-
 
     cv::Mat image = cv_bridge::toCvShare(image_msg, image_encodings::BGR8)->image;
 
@@ -41,7 +38,6 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
 
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZI>);
 
-
     //Filter points so we just see the person holding the board
     pcl::CropBox<pcl::PointXYZI> box_filter;
     box_filter.setInputCloud (cloud);
@@ -51,10 +47,9 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
     box_filter.filter(*cloud_filtered);
     viewer.showCloud(cloud_filtered);
 
-    //Reproject and draw on the image???
+    //Reproject and draw on the image
     image_geometry::PinholeCameraModel cam_model; // init cam_model
     cam_model.fromCameraInfo(cam_info_msg);
-
 
     for( int i = 0; i < cloud_filtered->size(); i++ ) {
         pcl::PointXYZI pt = cloud_filtered->points[i];
@@ -64,6 +59,10 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
         cv::circle(image, uv, 3, CV_RGB(255, 0, 0), -1);
 
     }
+
+
+    //TODO select matching points from each of the data sources
+
     cv::imshow("view", image);
     cv::waitKey(1);
 
