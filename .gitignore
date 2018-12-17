@@ -1,6 +1,7 @@
 
 #directories
 cmake-build-*
+build
 data/
 .idea
 
