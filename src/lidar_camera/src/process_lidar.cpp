@@ -41,7 +41,7 @@ void  ProcessLidar::filterROI(){
     box_filter.filter(*cloud_filtered_);
 }
 
-bool ProcessLidar::detectCheckerboard(cv::Point3d *lidar_checkerboard_center){
+bool ProcessLidar::detectCheckerboard(int min_board_points, cv::Point3d *lidar_checkerboard_center){
 
     board_points_ = pcl::PointCloud<pcl::PointXYZI>::Ptr(new pcl::PointCloud<pcl::PointXYZI>);
 
@@ -58,10 +58,14 @@ bool ProcessLidar::detectCheckerboard(cv::Point3d *lidar_checkerboard_center){
     pcl::PointXYZI centroid;
     pcl::computeCentroid(*board_points_, centroid);
 
-    lidar_checkerboard_center->x = centroid.x;
-    lidar_checkerboard_center->y = centroid.y;
-    lidar_checkerboard_center->z = centroid.z;
+
+    if(board_points_->size() > min_board_points) {
+        lidar_checkerboard_center->x = centroid.x;
+        lidar_checkerboard_center->y = centroid.y;
+        lidar_checkerboard_center->z = centroid.z;
 
 
-    return true;
+        return true;
+    }
+    return false;
 }

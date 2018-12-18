@@ -23,18 +23,22 @@ using namespace sensor_msgs;
 using namespace message_filters;
 
 
-const int MIN_REQUIRED_POINTS = 10;
+const int MIN_REQUIRED_POINTS = 12;
+const float MIN_POINT_DIST = 0.23;
 
 Eigen::Matrix4f cooridnate_transfrom = Eigen::Matrix4f::Zero();
 
 
 //TODO create a class and make these members
-std::vector<double> params = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; //x y z rx ry rz (rad)
+std::vector<double> params = {0, 0, 0, 0, 0, 0}; //x y z rx ry rz (rad)
 std::vector<cv::Point2f> image_points; //
 std::vector<cv::Point3d> lidar_points; //
 
 
 bool solved = false;
+
+std::string text = "Collecting Coresponding Points...";
+cv::Scalar text_color(0,0,255);
 
 void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info_msg, const PointCloud2ConstPtr& lidar_msg) {
 
@@ -46,31 +50,42 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
     //Transform the cloud into the correct cordinate system for cam model to be applied later
     pcl::transformPointCloud(*cloud, *cloud, cooridnate_transfrom);
 
+    //Rotate the cloud by the parameters suplied in params
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    transform.linear() = (Eigen::Matrix3f) Eigen::AngleAxisf(params[3], Eigen::Vector3f::UnitX())
+                         * Eigen::AngleAxisf(params[4], Eigen::Vector3f::UnitY())
+                         * Eigen::AngleAxisf(params[5], Eigen::Vector3f::UnitZ());
+    transform.translation() << params[0], params[1], params[2];
+    pcl::transformPointCloud(*cloud, *cloud, transform);
+
+
     //Reproject and draw on the image
     image_geometry::PinholeCameraModel cam_model; // init cam_model
     cam_model.fromCameraInfo(cam_info_msg);
 
     ProcessLidar process_lidar(cloud);
     cv::Point2f image_checkerboard_center;
+
+
     if( detectCheckerboardCenter(image, &image_checkerboard_center) ){
         //if center is in ROI i.e. the
 
 
         cv::Point3d lidar_checkerboard_center;
-        process_lidar.detectCheckerboard(&lidar_checkerboard_center);
+        if(process_lidar.detectCheckerboard(100, &lidar_checkerboard_center)) {
 
-        bool skip = false;
-        for(auto point: lidar_points){
-            if(cv::norm(point - lidar_checkerboard_center) < 0.25){
-                skip = true;
+            bool skip = false;
+            for (auto point: lidar_points) {
+                if (cv::norm(point - lidar_checkerboard_center) < MIN_POINT_DIST) {
+                    skip = true;
+                }
+            }
+
+            if (!skip) {
+                image_points.push_back(std::move(image_checkerboard_center));
+                lidar_points.push_back(std::move(lidar_checkerboard_center));
             }
         }
-
-        if(!skip){
-            image_points.push_back(std::move(image_checkerboard_center));
-            lidar_points.push_back(std::move(lidar_checkerboard_center));
-        }
-
     }
 
     //If there have been enough points collected run the solver
@@ -80,25 +95,19 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
         calibration_solver.solveParameters(image_points, lidar_points, cam_model, &params);
         solved = true;
 
+
+        text = "Calibration Solved";
+        text_color = cv::Scalar(0,255,0);
+
         for (const auto &val : params){
             std::cout << val << " ";
         }
         std::cout << std::endl;
     }
 
-    //Transform the cloud to show the result
-    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
-    transform.linear() = (Eigen::Matrix3f) Eigen::AngleAxisf(params[3], Eigen::Vector3f::UnitX())
-                         * Eigen::AngleAxisf(params[4], Eigen::Vector3f::UnitY())
-                         * Eigen::AngleAxisf(params[5], Eigen::Vector3f::UnitZ());
-    transform.translation() << params[0], params[1], params[2];
-
-    pcl::PointCloud<pcl::PointXYZI>::Ptr roateted_cloud(new pcl::PointCloud<pcl::PointXYZI>);
-    pcl::transformPointCloud(*process_lidar.cloud_filtered_, *roateted_cloud, transform);
-
     //Draw result
-    for( int i = 0; i < roateted_cloud->size(); i++ ) {
-        pcl::PointXYZI pt = roateted_cloud->points[i];
+    for( int i = 0; i < process_lidar.cloud_filtered_->size(); i++ ) {
+        pcl::PointXYZI pt = process_lidar.cloud_filtered_->points[i];
         cv::Point3d pt_cv(pt.x, pt.y, pt.z);
         cv::Point2d uv = cam_model.project3dToPixel(pt_cv);
         cv::circle(image, uv, 3, jetColormap(pt.intensity), -1);
@@ -116,8 +125,19 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
         }
     }
 
+    cv::putText(image, text, cv::Point(30,30), 1, 2, text_color);
     cv::imshow("view", image);
-    cv::waitKey(1);
+    char key = cv::waitKey(1);
+
+    if(key == 27){
+        //exit
+    } else if (key == 'r') { //reset
+        solved = false;
+        image_points.clear();
+        lidar_points.clear();
+    } else if (key == 's') { //save
+        //TODO write to file
+    }
 
 
     //TODO transform cloud and send as message stream
