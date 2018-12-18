@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 
 #include "colormap.h"
-#include "calibration_solver.h"
+#include "solver.h"
 #include "process_lidar.h"
 #include "process_camera.h"
 
@@ -58,19 +58,15 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
     transform.translation() << params[0], params[1], params[2];
     pcl::transformPointCloud(*cloud, *cloud, transform);
 
-
-    //Reproject and draw on the image
-    image_geometry::PinholeCameraModel cam_model; // init cam_model
+    // init cam_model
+    image_geometry::PinholeCameraModel cam_model;
     cam_model.fromCameraInfo(cam_info_msg);
 
     ProcessLidar process_lidar(cloud);
     cv::Point2f image_checkerboard_center;
 
-
+    //Detect the checkerboard in camera and if found try in lidar data
     if( detectCheckerboardCenter(image, &image_checkerboard_center) ){
-        //if center is in ROI i.e. the
-
-
         cv::Point3d lidar_checkerboard_center;
         if(process_lidar.detectCheckerboard(100, &lidar_checkerboard_center)) {
 
@@ -90,7 +86,7 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
 
     //If there have been enough points collected run the solver
     if(image_points.size() > MIN_REQUIRED_POINTS && !solved) {
-        CalibrationSolver calibration_solver;
+        Solver calibration_solver;
 
         calibration_solver.solveParameters(image_points, lidar_points, cam_model, &params);
         solved = true;
@@ -129,9 +125,7 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
     cv::imshow("view", image);
     char key = cv::waitKey(1);
 
-    if(key == 27){
-        //exit
-    } else if (key == 'r') { //reset
+    if (key == 'r') { //reset
         solved = false;
         image_points.clear();
         lidar_points.clear();
@@ -139,9 +133,7 @@ void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info
         //TODO write to file
     }
 
-
     //TODO transform cloud and send as message stream
-
 }
 
 

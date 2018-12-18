@@ -44,7 +44,7 @@ add_executable(${PROJECT_NAME}_node src/lidar_camera_node.cpp
         src/colormap.cpp
         src/utils.cpp
         src/process_lidar.cpp
-        src/calibration_solver.cpp
+        src/solver.cpp
         src/process_camera.cpp)
 
 target_link_libraries(${PROJECT_NAME}_node
