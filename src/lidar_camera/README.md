@@ -6,7 +6,7 @@ The checkerboard is detected in the image using the OpenCV detector and the cent
 
 There is a minimum distance between collected points is used to ensure a spread of data. The reprojection error is minimized using Ceres once enough points have been collected.
 
-Ideally the data would have used a reflective surface to make the extraction of the board a little easier in the lidar.
+Ideally the data would have contained a retro-reflective surface for the board to make the segmentation a little bit easier in the lidar data.
 
 ### Build
 
