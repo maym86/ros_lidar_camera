@@ -6,6 +6,8 @@ The checkerboard is detected in the image using the OpenCV detector and the cent
 
 There is a minimum distance between collected points is used to ensure a spread of data. The reprojection error is minimized using Ceres once enough points have been collected.
 
+Ideally the data would have contained a retro-reflective surface for the board to make the segmentation more robust in the lidar data.
+
 ### Build
 
 Run `catkin_make` in the project root directory.
@@ -15,3 +17,9 @@ Run `catkin_make` in the project root directory.
 Run the executable created in `devel/lib/lidar_camera/lidar_camera_node`
 
 Play the bag file run `data.sh`. Make sure the intriniscs have been calculated and added to the bag file first.
+
+#Result
+
+https://youtu.be/x5HLYL_B65g
+
+![Lidar camera calibration result](lidar-camera.png)
