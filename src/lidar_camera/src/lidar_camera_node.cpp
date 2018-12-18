@@ -22,23 +22,19 @@
 using namespace sensor_msgs;
 using namespace message_filters;
 
-
 const int MIN_REQUIRED_POINTS = 12;
 const float MIN_POINT_DIST = 0.23;
 
 Eigen::Matrix4f cooridnate_transfrom = Eigen::Matrix4f::Zero();
 
-
-//TODO create a class and make these members
 std::vector<double> params = {0, 0, 0, 0, 0, 0}; //x y z rx ry rz (rad)
-std::vector<cv::Point2f> image_points; //
-std::vector<cv::Point3d> lidar_points; //
-
-
-bool solved = false;
+std::vector<cv::Point2f> image_points;
+std::vector<cv::Point3d> lidar_points;
 
 std::string text = "Collecting Coresponding Points...";
 cv::Scalar text_color(0,0,255);
+bool solved = false;
+
 
 void callback(const ImageConstPtr& image_msg, const CameraInfoConstPtr& cam_info_msg, const PointCloud2ConstPtr& lidar_msg) {
 
@@ -153,12 +149,10 @@ int main(int argc, char **argv) {
     Synchronizer<SyncPolicy> sync(SyncPolicy(10), image_sub, info_sub, lidar_sub);
     sync.registerCallback(boost::bind(&callback, _1, _2, _3));
 
-
     cooridnate_transfrom(0,1) = -1;
     cooridnate_transfrom(1,2) = -1;
     cooridnate_transfrom(2,0) = 1;
     cooridnate_transfrom(3,3) = 1;
-
 
     ros::spin();
     cv::destroyWindow("view");

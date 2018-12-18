@@ -11,20 +11,16 @@ struct ReprojectionError {
     }
 
     bool operator()(const double *params_in, double *residual) const {
-        //transform points and calc residual
+        //Transform point to image coordinates using camerainfo and compute residuals
         cv::Mat r_mat =  eulerAnglesToRotationMatrix(params_in[3], params_in[4], params_in[5], false);
         cv::Mat rotated = r_mat * cv::Mat(lidar_point_);
-
-        //TODO double check that access is correct here might be (0,1) etc.
 
         cv::Point3d lidar_point(rotated);
         lidar_point.x += params_in[0];
         lidar_point.y += params_in[1];
         lidar_point.z += params_in[2];
 
-        //Transform point to image coordinates using camerainfo and compute residuals
         cv::Point2d uv = cam_model_.project3dToPixel(lidar_point);
-
         residual[0] = uv.x - image_point_.x;
         residual[1] = uv.y - image_point_.y;
         return true;
@@ -43,8 +39,7 @@ void Solver::solveParameters(const std::vector<cv::Point2f> &image_points,
                                         std::vector<double> *lidar_params) {
     ceres::Problem problem;
 
-
-    double* solution = &lidar_params->front(); //TODO verify that this is ok and the double is pointing at the data
+    double* solution = &lidar_params->front();
 
     for (size_t i = 0; i < image_points.size(); i++) {
         ceres::CostFunction *cost_function =
