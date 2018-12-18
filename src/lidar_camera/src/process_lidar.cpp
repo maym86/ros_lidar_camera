@@ -58,7 +58,6 @@ bool ProcessLidar::detectCheckerboard(int min_board_points, cv::Point3d *lidar_c
     pcl::PointXYZI centroid;
     pcl::computeCentroid(*board_points_, centroid);
 
-
     if(board_points_->size() > min_board_points) {
         lidar_checkerboard_center->x = centroid.x;
         lidar_checkerboard_center->y = centroid.y;
