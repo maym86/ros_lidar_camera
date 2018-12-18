@@ -12,6 +12,6 @@ Test of calibration with ROS
 
 https://youtu.be/x5HLYL_B65g
 
-![alt text](lidar-camera.png)
+![Lidar camera calibration result](src/lidar_camera/lidar-camera.png)
 
 
