@@ -1,0 +1,5 @@
+
+<launch>
+    <node pkg="rosbag" type="play" name="player" output="screen" args="$(arg rosbag)"/>
+    <node name="image_proc" pkg="image_proc" type="image_proc" ns="sensors/camera"/>
+</launch>
