@@ -13,7 +13,7 @@ public:
     ProcessLidar(const pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud);
 
 
-    bool detectCheckerboard(cv::Point3d *lidar_checkerboard_center);
+    bool detectCheckerboard(int min_board_points, cv::Point3d *lidar_checkerboard_center);
 
     void setROI(float x_min, float x_max, float y_min, float y_max, float z_min, float z_max);
 
