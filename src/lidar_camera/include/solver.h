@@ -6,7 +6,7 @@
 
 #include <image_geometry/pinhole_camera_model.h>
 
-class CalibrationSolver {
+class Solver {
   public:
     void solveParameters(const std::vector<cv::Point2f> &image_points,
                          const std::vector<cv::Point3d> &lidar_points,

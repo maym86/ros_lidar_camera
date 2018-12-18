@@ -1,5 +1,5 @@
 
-#include "calibration_solver.h"
+#include "solver.h"
 #include "utils.h"
 
 struct ReprojectionError {
@@ -37,7 +37,7 @@ struct ReprojectionError {
 
 };
 
-void CalibrationSolver::solveParameters(const std::vector<cv::Point2f> &image_points,
+void Solver::solveParameters(const std::vector<cv::Point2f> &image_points,
                                         const std::vector<cv::Point3d> &lidar_points,
                                         const image_geometry::PinholeCameraModel &cam_model,
                                         std::vector<double> *lidar_params) {
