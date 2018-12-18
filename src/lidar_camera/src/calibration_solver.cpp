@@ -24,7 +24,6 @@ struct ReprojectionError {
 
         //Transform point to image coordinates using camerainfo and compute residuals
         cv::Point2d uv = cam_model_.project3dToPixel(lidar_point);
-        std::cout << uv << std::endl;
 
         residual[0] = uv.x - image_point_.x;
         residual[1] = uv.y - image_point_.y;

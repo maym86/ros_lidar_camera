@@ -43,13 +43,15 @@ include_directories(
 add_executable(${PROJECT_NAME}_node src/lidar_camera_node.cpp
         src/colormap.cpp
         src/utils.cpp
-        src/calibration_solver.cpp)
+        src/process_lidar.cpp
+        src/calibration_solver.cpp
+        src/process_camera.cpp)
 
 target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
    ${OpenCV_LIBS} 
    ${Boost_LIBRARIES}
-        ${CERES_LIBRARIES}
+   ${CERES_LIBRARIES}
 )
 
 #############
